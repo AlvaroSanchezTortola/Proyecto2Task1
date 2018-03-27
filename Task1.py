@@ -36,11 +36,40 @@ def main():
     print("total unique words training: ", len(total_words_training))
     
     prueba = ["this", "is", "spam"]
+    #prueba = fun.readEntryFile("prueba.txt", True, False)
     print(prueba)
     
-    prob_spam = fun.propabilidadTotal(prueba, 1, "spam", ham_words, spam_words, len(total_words_training), training)
-    prob_ham = fun.propabilidadTotal(prueba, 1, "ham", ham_words, spam_words, len(total_words_training), training)    
-    
+    prob_spam = fun.propabilidadTotal(prueba[0], 1, "spam", ham_words, spam_words, len(total_words_training), training)
+    prob_ham = fun.propabilidadTotal(prueba[0], 1, "ham", ham_words, spam_words, len(total_words_training), training)    
     print("probabilidad spam: ", prob_spam, "\n", "probabilidad ham: ", prob_ham)
     
+    mejor_i = 0
+    mejor_accuracy = 0.0
+    for j in range(1,10):
+        #Iterar y obtener accuracy por un i ---------
+        aciertos = 0
+        i_actual = j
+        print ("para este i: ", i_actual)
+        for i in range(len(test)):
+            tupla = test[i]
+            actual_label = tupla[0]
+            phrase = fun.sanitizar(tupla[1])
+            phrase_words = phrase.split(" ")
+            
+            print ("i: ", i_actual," iter: ", i, ": ", phrase)
+            
+            prob_spam = fun.propabilidadTotal(phrase_words, i_actual, "spam", ham_words, spam_words, len(total_words_training), training)
+            prob_ham = fun.propabilidadTotal(phrase_words, i_actual, "ham", ham_words, spam_words, len(total_words_training), training) 
+            predicted = ""
+            if(prob_spam > prob_ham): predicted = "spam"
+            elif(prob_spam < prob_ham): predicted = "ham"
+            if(actual_label==predicted): aciertos+=1
+        
+        accuracy = aciertos/len(test)
+        print("\nAccuracy en test: ", accuracy)
+        #-----------------------------------------------
+        if (accuracy > mejor_accuracy):
+            mejor_accuracy = accuracy
+            mejor_i = i_actual
+    print("\nMejor i y accuracy: ", mejor_i, ": ", mejor_accuracy)
 main()

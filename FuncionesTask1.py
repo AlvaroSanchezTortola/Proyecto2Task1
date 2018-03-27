@@ -91,6 +91,25 @@ def probabilidadMain(grupo, tipo, k):
 def propabilidadTotal(mensaje, k, objetivo, tipo_ham, tipo_spam, palabras_totales, grupo):
     parte1 =  probabilidadOracion(mensaje, k, tipo_spam, palabras_totales)*probabilidadMain(grupo, "spam", k)
     parte2 =  probabilidadOracion(mensaje, k, tipo_ham, palabras_totales)*probabilidadMain(grupo, "ham", k)
+    #print(parte1, parte2)
+    if(parte1==0.0): parte1 = 0.0000000001
+    if(parte2==0.0): parte2 = 0.0000000001
+    
     if (objetivo=="spam"): return ((parte1)/(parte1 + parte2))
     elif(objetivo=="ham"): return ((parte2)/(parte2 + parte1))
     
+def readEntryFile(file_name, sanit=True, log=False):
+    matriz = []
+    data = [sanitizar(line.strip()) for line in open(file_name, 'r')]
+    for i in range(len(data)):
+        columna = []
+        phrase = data[i].split(" ")
+        
+        columna.append(phrase)
+        matriz.append(columna)
+    
+    if (log):
+        for j in range(len(data)):
+            print(matriz[j])
+        print("\n")
+    return matriz
