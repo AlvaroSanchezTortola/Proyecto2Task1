@@ -33,43 +33,34 @@ def main():
     print("size unique spam words", len(spam_words))
     
     total_words_training = fun.getUniqueWords(fun.getColumna(training, 1))
-    print("total unique words training: ", len(total_words_training))
+    print("total unique words training: ", len(total_words_training), "\n")
     
+    """ #Prueba 
     prueba = ["this", "is", "spam"]
     #prueba = fun.readEntryFile("prueba.txt", True, False)
     print(prueba)
     
     prob_spam = fun.propabilidadTotal(prueba[0], 1, "spam", ham_words, spam_words, len(total_words_training), training)
     prob_ham = fun.propabilidadTotal(prueba[0], 1, "ham", ham_words, spam_words, len(total_words_training), training)    
-    print("probabilidad spam: ", prob_spam, "\n", "probabilidad ham: ", prob_ham)
+    print("probabilidad spam: ", prob_spam, "\n", "probabilidad ham: ", prob_ham, "\n")
+    """
+    #--Cross Validation Phase---
+    mejor_i, mejor_accuracy = 0, 0.0
     
-    mejor_i = 0
-    mejor_accuracy = 0.0
-    for j in range(1,10):
-        #Iterar y obtener accuracy por un i ---------
-        aciertos = 0
-        i_actual = j
-        print ("para este i: ", i_actual)
-        for i in range(len(test)):
-            tupla = test[i]
-            actual_label = tupla[0]
-            phrase = fun.sanitizar(tupla[1])
-            phrase_words = phrase.split(" ")
-            
-            print ("i: ", i_actual," iter: ", i, ": ", phrase)
-            
-            prob_spam = fun.propabilidadTotal(phrase_words, i_actual, "spam", ham_words, spam_words, len(total_words_training), training)
-            prob_ham = fun.propabilidadTotal(phrase_words, i_actual, "ham", ham_words, spam_words, len(total_words_training), training) 
-            predicted = ""
-            if(prob_spam > prob_ham): predicted = "spam"
-            elif(prob_spam < prob_ham): predicted = "ham"
-            if(actual_label==predicted): aciertos+=1
-        
-        accuracy = aciertos/len(test)
-        print("\nAccuracy en test: ", accuracy)
-        #-----------------------------------------------
-        if (accuracy > mejor_accuracy):
-            mejor_accuracy = accuracy
-            mejor_i = i_actual
-    print("\nMejor i y accuracy: ", mejor_i, ": ", mejor_accuracy)
+    for i in range(1,10):
+        salida_cross = fun.generateOutputMatrix(cross_validation, i, ham_words, spam_words, len(total_words_training), training, True)
+        accuracy = fun.getAccuracy(salida_cross, cross_validation)
+        if (accuracy > mejor_accuracy): mejor_accuracy, mejor_i = accuracy, i
+    print("\nCROSS VALIADTION: Mejor i y accuracy: ", mejor_i, ": ", mejor_accuracy)
+    
+    #--Test Phase---
+    salida_test = fun.generateOutputMatrix(test, mejor_i, ham_words, spam_words, len(total_words_training), training, True)
+    test_acc = fun.getAccuracy(salida_test, test)
+    print("\nTEST: i y accuracy: ", mejor_i, ": ", test_acc, "\n")
+    
+    #--Input Phase---
+    input_file = fun.readEntryFile("prueba.txt", True, False, False)
+    salida_input = fun.generateOutputMatrix(input_file, mejor_i, ham_words, spam_words, len(total_words_training), training, True)
+    fun.writeOutput(salida_input, "output.txt")
+
 main()
